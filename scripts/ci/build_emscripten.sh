@@ -40,6 +40,8 @@ else
 	BUILD_DIR="$1"
 fi
 
+apt-get update && apt-get install lz4
+
 WORKSPACE=/root/project
 
 cd $WORKSPACE
@@ -71,8 +73,43 @@ make soljson
 
 cd ..
 mkdir -p upload
-cp "$BUILD_DIR/libsolc/soljson.js" upload/
-cp "$BUILD_DIR/libsolc/soljson.js" ./
+scripts/ci/pack_soljson.sh "$BUILD_DIR/libsolc/soljson.js" "$BUILD_DIR/libsolc/soljson.wasm" > upload/soljson.js
+node - "$BUILD_DIR/libsolc/soljson.wasm" << "EOF"
+var embeddedBinary = require('./upload/soljson.js').wasmBinary
+require('fs').readFile(process.argv[2], function(err, data) {
+	if (err) throw err;
+	if (data.length != embeddedBinary.length)
+		throw "different size";
+	for(var i = 0; i < data.length; ++i)
+		if (data[i] != embeddedBinary[i])
+			throw "different contents";
+	console.log("Binaries match.")
+})
+EOF
+node - "$BUILD_DIR/libsolc/soljson.wasm" << "EOF"
+Uint8ArrayFull = Uint8Array;
+Uint8Array = function(size) {
+	var result = new Uint8ArrayFull(size);
+	result.fill = undefined;
+	return result;
+}
+var dst = new Uint8Array(32);
+if (dst.fill !== undefined)
+	throw "Mocking failed.";
+
+var embeddedBinary = require('./upload/soljson.js').wasmBinary
+require('fs').readFile(process.argv[2], function(err, data) {
+	if (err) throw err;
+	if (data.length != embeddedBinary.length)
+		throw "different size";
+	for(var i = 0; i < data.length; ++i)
+		if (data[i] != embeddedBinary[i])
+			throw "different contents";
+	console.log("Binaries match.")
+})
+EOF
+
+cp upload/soljson.js ./
 
 OUTPUT_SIZE=$(ls -la soljson.js)
 
