@@ -1,5 +1,6 @@
-// ゾンビを作成する。
-pragma solidity ^0.0.136;
+//ゾンビ作成
+
+pragma solidity  ^0.8.11;
 
 contract ZombieFactory {
 
