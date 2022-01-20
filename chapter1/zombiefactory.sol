@@ -1,6 +1,7 @@
 //ゾンビゲームをサイトに合わせて作り、コードの説明をここにまとめる。
 //Chapter1が終わった時点のコード。
 
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 //（solidityのバージョンを記載。エラーが起こらないように。）
 
@@ -29,7 +30,7 @@ contract ZombieFactory {
     Zombie[] public zombies;
     //（構造体の配列を作成し、publicで宣言）
 
-    function _createZombie(string _name, uint _dna) private {
+    function _createZombie(string memory _name, uint _dna) private {
     //新しいゾンビを作成、関数はprivate、privateにするときは関数名の前にアンダーバー
     //（関数の宣言、引数の設定）
 
@@ -39,7 +40,7 @@ contract ZombieFactory {
         NewZombie(id, _name, _dna);
     } 
 
-    function _generateRandomDna(string _str) private view returns (uint) {
+    function _generateRandomDna(string memory _str) private view returns (uint) {
     //戻り値をuintに設定
         uint rand = uint(keccak256(_str));
         //16桁のDNAを作る
@@ -47,7 +48,7 @@ contract ZombieFactory {
         return rand % dnaModulus;
     }
 
-    function createRandomZombie(string _name) public {
+    function createRandomZombie(string memory _name) public {
     //ゾンビの名前やユーザーの名前をインプットしてランダムなDNAでゾンビを作る
         uint randDna = _generateRandomDna(_name);
         _createZombie(_name, randDna);
